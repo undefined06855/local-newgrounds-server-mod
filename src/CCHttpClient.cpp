@@ -4,7 +4,6 @@
 
 void HookedCCHttpClient::send(cocos2d::extension::CCHttpRequest *request) {
     auto url = std::string(request->getUrl());
-    geode::log::debug("{}", url);
 
     // network test failed
     if (g_networkTestFailed) {
@@ -65,6 +64,8 @@ void HookedCCHttpClient::send(cocos2d::extension::CCHttpRequest *request) {
     auto pollUrl = fmt::format("{}/poll/{}/{}", g_url, type, id);
     auto downloadUrl = fmt::format("{}/download/{}/{}", g_url, type, id);
 
+    geode::log::debug("Testing {} {}", isSong, id);
+
     // and send the request
     auto requestFields = reinterpret_cast<FieldsCCHttpRequest *>(request)->m_fields.self();
     requestFields->m_listener.getFilter().cancel();
@@ -89,6 +90,7 @@ void HookedCCHttpClient::send(cocos2d::extension::CCHttpRequest *request) {
 
             // yes it exists on server! change url to download url before sending off
             if (value.get<bool>("exists").unwrapOr(false)) {
+                geode::log::debug("Exists on server, downloading using that...");
                 request->setUrl(downloadUrl.c_str());
             }
 
