@@ -45,9 +45,15 @@ void HookedCCHttpClient::send(cocos2d::extension::CCHttpRequest *request) {
     if (url.starts_with("https://geom")) {
         // robtop (library or sfx)
         isSong = url.find("music") != std::string::npos;
-        auto start = url.find_last_of("/") + 1;
-        auto end = url.find_first_of(".ogg", start);
-        id = url.substr(start, end - start);
+        if (isSong) {
+            auto start = url.find_last_of("/") + 1;
+            auto end = url.find_first_of(".ogg", start);
+            id = url.substr(start, end - start);
+        } else {
+            auto start = url.find_last_of("/s") + 2;
+            auto end = url.find_first_of(".ogg", start);
+            id = url.substr(start, end - start);
+        }
     } else {
         // newgrounds
         isSong = true;
@@ -64,7 +70,7 @@ void HookedCCHttpClient::send(cocos2d::extension::CCHttpRequest *request) {
     auto pollUrl = fmt::format("{}/poll/{}/{}", g_url, type, id);
     auto downloadUrl = fmt::format("{}/download/{}/{}", g_url, type, id);
 
-    geode::log::debug("Testing {} {}", isSong, id);
+    geode::log::debug("Testing {} {}", type, id);
 
     // and send the request
     auto requestFields = reinterpret_cast<FieldsCCHttpRequest *>(request)->m_fields.self();
