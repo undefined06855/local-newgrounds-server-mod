@@ -2,8 +2,9 @@
 #include "CCHttpRequest.hpp"
 #include "MenuLayer.hpp"
 
-void HookedCCHttpClient::send(cocos2d::extension::CCHttpRequest *request) {
+void HookedCCHttpClient::send(cocos2d::extension::CCHttpRequest* request) {
     auto url = std::string(request->getUrl());
+    auto requestFields = reinterpret_cast<FieldsCCHttpRequest *>(request)->m_fields.self();
 
     // network test failed
     if (g_networkTestFailed) {
@@ -12,7 +13,7 @@ void HookedCCHttpClient::send(cocos2d::extension::CCHttpRequest *request) {
     }
 
     // we've just handled this
-    if (url.ends_with("?done=true")) {
+    if (requestFields->m_handled) {
         CCHttpClient::send(request);
         return;
     }
@@ -73,10 +74,9 @@ void HookedCCHttpClient::send(cocos2d::extension::CCHttpRequest *request) {
     geode::log::debug("Testing {} {}", type, id);
 
     // and send the request
-    auto requestFields = reinterpret_cast<FieldsCCHttpRequest *>(request)->m_fields.self();
     requestFields->m_listener.getFilter().cancel();
     requestFields->m_listener.setFilter(req.get(pollUrl));
-    requestFields->m_listener.bind([this, request, downloadUrl](geode::utils::web::WebTask::Event *event) {
+    requestFields->m_listener.bind([this, request, requestFields, downloadUrl](geode::utils::web::WebTask::Event *event) {
         if (event->isCancelled()) {
             request->setShouldCancel(true);
             request->release();
@@ -100,7 +100,7 @@ void HookedCCHttpClient::send(cocos2d::extension::CCHttpRequest *request) {
                 request->setUrl(downloadUrl.c_str());
             }
 
-            request->setUrl(fmt::format("{}?done=true", request->getUrl()).c_str());
+            requestFields->m_handled = true;
             CCHttpClient::send(request);
             request->release();
         }

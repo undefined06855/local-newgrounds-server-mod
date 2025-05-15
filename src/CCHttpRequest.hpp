@@ -5,6 +5,7 @@
 class $objectModify(FieldsCCHttpRequest, cocos2d::extension::CCHttpRequest) {
     struct Fields {
         geode::EventListener<geode::utils::web::WebTask> m_listener;
+        bool m_handled;
         Fields();
     };
 

@@ -12,6 +12,7 @@ bool HookedMenuLayer::init() {
 
     // network test
     auto req = geode::utils::web::WebRequest();
+    fields->m_listener.setFilter(req.get(g_url));
     fields->m_listener.bind([this](geode::utils::web::WebTask::Event* event) {
         if (event->getValue()) {
             auto res = event->getValue()->json();
@@ -54,7 +55,6 @@ bool HookedMenuLayer::init() {
             geode::log::info("Server test successful!");
         }
     });
-    fields->m_listener.setFilter(req.get(g_url));
 
     return true;
 }
