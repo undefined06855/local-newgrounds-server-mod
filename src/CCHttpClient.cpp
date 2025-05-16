@@ -2,6 +2,14 @@
 #include "CCHttpRequest.hpp"
 #include "MenuLayer.hpp"
 
+// async web + newgrounds proxy compatibility
+void HookedCCHttpClient::onModify(auto& self) {
+    auto res = self.setHookPriorityPre("cocos2d::extension::CCHttpClient::send", geode::Priority::VeryEarly);
+    if (res.isErr()) {
+        geode::log::warn("failed to set hook prio");
+    }
+}
+
 void HookedCCHttpClient::send(cocos2d::extension::CCHttpRequest* request) {
     auto url = std::string(request->getUrl());
     auto requestFields = reinterpret_cast<FieldsCCHttpRequest *>(request)->m_fields.self();
@@ -47,19 +55,19 @@ void HookedCCHttpClient::send(cocos2d::extension::CCHttpRequest* request) {
         // robtop (library or sfx)
         isSong = url.find("music") != std::string::npos;
         if (isSong) {
-            auto start = url.find_last_of("/") + 1;
-            auto end = url.find_first_of(".ogg", start);
+            auto start = url.find("/") + 1;
+            auto end = url.find(".ogg");
             id = url.substr(start, end - start);
         } else {
-            auto start = url.find_last_of("/s") + 2;
-            auto end = url.find_first_of(".ogg", start);
+            auto start = url.find("x/s") + 4;
+            auto end = url.find(".ogg");
             id = url.substr(start, end - start);
         }
     } else {
         // newgrounds
         isSong = true;
-        auto start = url.find_last_of("/") + 1;
-        auto end = url.find_first_of("_", start);
+        auto start = url.find("/") + 1;
+        auto end = url.find("_", start);
         id = url.substr(start, end - start);
     }
 
