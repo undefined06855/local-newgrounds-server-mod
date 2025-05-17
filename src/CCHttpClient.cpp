@@ -122,6 +122,4 @@ void HookedCCHttpClient::send(cocos2d::extension::CCHttpRequest* request) {
             request->release();
         }
     });
-
-    IconType::
 }
