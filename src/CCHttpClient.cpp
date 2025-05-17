@@ -52,21 +52,30 @@ void HookedCCHttpClient::send(cocos2d::extension::CCHttpRequest* request) {
     std::string id;
     bool isSong;
     if (url.starts_with("https://geom")) {
-        // robtop (library or sfx)
-        isSong = url.find("music") != std::string::npos;
+        isSong = url.find("sfx") == std::string::npos;
         if (isSong) {
-            auto start = url.find("/") + 1;
-            auto end = url.find(".ogg");
-            id = url.substr(start, end - start);
+            if (url.find("music") != std::string::npos) {
+                // https://geometrydashfiles.b-cdn.net/music/10010848.ogg (library)
+                auto start = url.find("music/") + 6;
+                auto end = url.find(".ogg", start);
+                id = url.substr(start, end - start);
+            } else {
+                // https://geometrydashcontent.b-cdn.net/songs/933704.mp3 (ng rob)
+                auto start = url.find("songs/") + 6;
+                auto end = url.find(".mp3", start);
+                id = url.substr(start, end - start);
+            }
         } else {
-            auto start = url.find("x/s") + 4;
-            auto end = url.find(".ogg");
+            // https://geometrydashfiles.b-cdn.net/sfx/s10010848.ogg (sfx)
+            auto start = url.find("sfx/s") + 5;
+            auto end = url.find(".ogg", start);
             id = url.substr(start, end - start);
         }
     } else {
         // newgrounds
+        // https://audio.ngfiles.com/1416000/1416510_ircurs.mp3?f1744069343 (ng direct)
         isSong = true;
-        auto start = url.find("/") + 1;
+        auto start = url.find("0/") + 2;
         auto end = url.find("_", start);
         id = url.substr(start, end - start);
     }
@@ -113,4 +122,6 @@ void HookedCCHttpClient::send(cocos2d::extension::CCHttpRequest* request) {
             request->release();
         }
     });
+
+    IconType::
 }
