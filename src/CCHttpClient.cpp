@@ -28,9 +28,9 @@ void HookedCCHttpClient::send(cocos2d::extension::CCHttpRequest* request) {
 
     // see if this is a url we should handle
     static const std::array<const char*, 3> songUrlPrefixes = {
-        "https://audio.",
-        "http://audio.",
-        "https://geomet",
+        "https://ngfiles-proxy.b-cdn.net",
+        "http://ngfiles-proxy.b-cdn.net",
+        "https://geometrydash",
     };
 
     bool found = false;
